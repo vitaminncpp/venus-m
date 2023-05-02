@@ -1,14 +1,12 @@
 import dotenv from 'dotenv';
-
+import {genSuccessResponse} from "../utils/message.js";
+import * as userService from "../services/user.service.js"
 
 dotenv.config()
 
-export async function login(req, res) {
-  const token = process.env.JWT_SECRET;
-  res.status(200).send({success: "Login successful", token})
-}
-
-
 export async function profile(req, res) {
-  res.status(200).send({info: "User Profile"})
+  const data = await userService.profile(req.username);
+  return res.status(data.code).send(data)
+
 }
+

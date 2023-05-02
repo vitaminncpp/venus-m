@@ -1,11 +1,15 @@
+/**
+ *  Route Mapping for /api/user/*
+ */
+
 import {Router} from "express";
-import {login, profile} from "../controllers/user.controller.js";
-import authMiddleware from "../middleware/auth.middleware.js"
+import {profile} from "../controllers/user.controller.js";
+import auth from "../middleware/auth.middleware.js";
+
 
 const userRouter = Router();
 
-
-userRouter.post("/profile", authMiddleware, profile)
-
+userRouter.use(auth)
+userRouter.get("/profile", profile)
 
 export default userRouter;
