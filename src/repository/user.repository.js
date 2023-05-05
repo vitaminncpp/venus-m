@@ -6,7 +6,7 @@ export async function findByUsername(username) {
 
 
 // user.repository.js
-export async function saveUser(username, name, pHash) {
-  const user = new UserModel({username, name, pHash});
+export async function saveUser(username, name, pHash, roles) {
+  const user = new UserModel({username, name, pHash, roles});
   return await user.save()
 }

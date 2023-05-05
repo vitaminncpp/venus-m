@@ -13,6 +13,7 @@ const UserSchema = new Schema({
   },
   name: {type: String, required: [true, "Name is Required"]},
   pHash: {type: String, required: [true, "Password is Required"]},
+  roles: [{type: String, required: [true, "Roles are Required"]}]
 });
 
 export default mongoose.model('User', UserSchema, "users");

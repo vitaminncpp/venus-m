@@ -17,3 +17,7 @@ const log = logger({
 });
 
 export default log;
+
+export function debugInfo(data) {
+  console.log(`${new Error().stack.split('\n')[2].trim()}::${JSON.stringify(data, null, 4)}`);
+}

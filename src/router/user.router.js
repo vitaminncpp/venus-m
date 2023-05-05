@@ -10,6 +10,6 @@ import auth from "../middleware/auth.middleware.js";
 const userRouter = Router();
 
 userRouter.use(auth)
-userRouter.get("/profile", profile)
+userRouter.post("/profile", profile)
 
 export default userRouter;
