@@ -9,8 +9,8 @@ export async function login(username, password) {
   try {
     const user = await findByUsername(username);
     if (user.username) {
-      const access = createAccessToken({username: user.username, name: user.name, roles: user.roles});
-      const refresh = createRefreshToken({username: user.username, name: user.name, roles: user.roles});
+      const access = createAccessToken({username: user.username, name: user.name});
+      const refresh = createRefreshToken({username: user.username, name: user.name});
       return genSuccessResponse(200, "Logged in successfully", {
         access,
         refresh,

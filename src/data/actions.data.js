@@ -5,7 +5,7 @@ export const actions = {
   removeRole: "removeRole",
   modifyRole: "modifyRole",
   addPermissionToRole: "addPermissionToRole",
-  removePermissionToRole: "removePermissionToRole",
+  removePermissionFromRole: "removePermissionFromRole",
   assignRoleToUser: "assignRoleToUser",
   revokeRoleFromUser: "revokeRoleFromUser",
   createUser: "createUser",
