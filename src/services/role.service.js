@@ -6,7 +6,7 @@ export async function getRole(name) {
   try {
     const data = await roleRepository.findOne(name);
     if (data) {
-      return genSuccessResponse(201, "Role Fetched successfully", {
+      return genSuccessResponse(200, "Role Fetched successfully", {
         name: data.name,
         permissions: data.permissions,
         description: data.description,

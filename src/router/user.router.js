@@ -4,12 +4,10 @@
 
 import {Router} from "express";
 import * as userController from "../controllers/user.controller.js";
-import auth from "../middleware/auth.middleware.js";
 
 
 const userRouter = Router();
 
-userRouter.use(auth)
 userRouter.post("/profile", userController.profile)
 
 // TODO Implements controllers

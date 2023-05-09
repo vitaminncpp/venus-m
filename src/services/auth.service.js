@@ -26,15 +26,6 @@ export async function login(username, password) {
 }
 
 // user.service.js
-export async function register(username, name, password) {
-  const pHash = await hashPassword(password);
-  try {
-    const result = await saveUser(username, name, pHash, roleService.getDefaultRoles())
-    return genSuccessResponse(201, "user created successfully", {name: result.name, username: result.username});
-  } catch (err) {
-    return genErrorResponse(500, "error creating new user", err);
-  }
-}
 
 
 export async function refresh(username) {

@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import * as authServices from "../services/auth.service.js"
-import * as tokenService from "../services/token.service.js"
-import auth from "../middleware/auth.middleware.js";
+import * as userService from "../services/user.service.js"
 
 dotenv.config()
 
@@ -14,7 +13,7 @@ export async function login(req, res) {
 // user.controller.js
 export async function register(req, res) {
   const {username, name, password} = req.body;
-  const data = await authServices.register(username, name, password);
+  const data = await userService.saveUser(username, name, password);
   return res.status(data.code).send(data);
 }
 
