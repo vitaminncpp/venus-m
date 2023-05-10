@@ -1,13 +1,11 @@
-import {findByUsername, saveUser} from "../repository/user.repository.js";
+import * as userRepository from "../repository/user.repository.js";
 import {genErrorResponse, genSuccessResponse} from '../utils/message.utils.js';
-import {hashPassword} from "./password.service.js";
 import {createAccessToken, createRefreshToken} from "./token.service.js";
-import * as roleService from "./role.service.js"
 
 
 export async function login(username, password) {
   try {
-    const user = await findByUsername(username);
+    const user = await userRepository.findByUsername(username);
     if (user.username) {
       const access = createAccessToken({username: user.username, name: user.name});
       const refresh = createRefreshToken({username: user.username, name: user.name});

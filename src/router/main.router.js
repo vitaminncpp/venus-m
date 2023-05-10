@@ -9,10 +9,10 @@ import auth from "../middleware/auth.middleware.js";
 const router = Router()
 
 
+router.use("/api", appRoutes)
 router.use("/api/auth", authRoutes);
 router.use(auth)
 router.use("/api/user", userRoutes);
 router.use("/api/admin", adminRoutes);
-router.use("/api", appRoutes)
 
 export default router;
