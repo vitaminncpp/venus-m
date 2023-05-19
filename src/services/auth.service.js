@@ -1,25 +1,27 @@
 import * as userRepository from "../repository/user.repository.js";
-import {genErrorResponse, genSuccessResponse} from '../utils/message.utils.js';
+import { genSuccessResponse} from '../utils/message.utils.js';
 import {createAccessToken, createRefreshToken} from "./token.service.js";
+import {comparePassword} from "./password.service.js";
 
 
 export async function login(username, password) {
   try {
     const user = await userRepository.findByUsername(username);
-    if (user.username) {
-      const access = createAccessToken({username: user.username, name: user.name});
-      const refresh = createRefreshToken({username: user.username, name: user.name});
-      return genSuccessResponse(200, "Logged in successfully", {
-        access,
-        refresh,
-        user: {username: username, name: user.name, roles: user.roles}
-      })
-    } else {
-      return genErrorResponse(404, "user not found", {username})
+    if (!user) {
+      throw new Error("User not found")
     }
-
+    if (!await comparePassword(password, user.pHash)) {
+      throw new Error("Password does not match")
+    }
+    const access = createAccessToken({username: user.username, name: user.name});
+    const refresh = createRefreshToken({username: user.username, name: user.name});
+    return {
+      access,
+      refresh,
+      user: {username: username, name: user.name, roles: user.roles}
+    }
   } catch (err) {
-    return genErrorResponse(404, "user not found", err);
+    throw err;
   }
 }
 

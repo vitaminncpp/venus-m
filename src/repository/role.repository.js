@@ -40,3 +40,7 @@ export async function findActionsByRoles(roles) {
 export async function findOne(name) {
   return RoleModel.findOne({name});
 }
+
+export async function findAll() {
+  return RoleModel.find();
+}

@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import {genErrorResponse} from "../utils/message.utils.js";
 import {verifyAccessToken, verifyRefreshToken} from "../services/token.service.js";
-import {debugInfo} from "../utils/logger.utils.js";
 
 dotenv.config();
 export default function auth(req, res, next) {

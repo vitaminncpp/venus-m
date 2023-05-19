@@ -8,35 +8,56 @@ export async function createRole(req, res) {
   try {
     const user = req.authData;
     const result = await permission(user.username, actions.createRole)
-    if (result === true) {
-      const {name, description, permissions} = req.body;
-      const data = await roleService.createRole(name, permissions, description);
+    if (result === false) {
+      const data = genErrorResponse(403, "Forbidden", "you are not allowed to create role")
       return res.status(data.code).send(data)
-    } else if (result === false) {
-      return res.status(403).send(genErrorResponse(403, "Forbidden", "You are not allowed to perform Role Creation."));
-    } else {
-      return res.status(result.code).send(result);
     }
+    const {name, permissions, description} = req.body;
+    if (await roleService.roleExists(name)) {
+      const data = genErrorResponse(409, "Already Exists", "Role already Exists")
+      return res.status(data.code).send(data)
+    }
+
+    const role = await roleService.createRole(name, permissions, description)
+    if (!role) {
+      const data = genErrorResponse(500, "Internal server error", "Cant process your request")
+      return res.status(data.code).send(data)
+    }
+    const data = genSuccessResponse(201, "Role created successfully", role)
+    return res.status(data.code).send(data);
   } catch (err) {
-    return res.status(500).send(genErrorResponse(500, "Internal Server Error", err));
+    if (!err.status)
+      err.status = 500;
+    return res.status(err.status).send(genErrorResponse(err.status, err.message, err));
   }
 }
 
 export async function deleteRole(req, res) {
   try {
     const user = req.authData;
-    const {name} = req.body;
+    const {rolename} = req.params;
     const result = await permission(user.username, actions.removeRole);
-    if (result === true) {
-      const data = await roleService.deleteRole(name);
+
+    if (result === false) {
+      const data = genErrorResponse(403, "Forbidden", "you are not allowed to delete role")
       return res.status(data.code).send(data)
-    } else if (result === false) {
-      return res.status(403).send(genErrorResponse(403, "Forbidden", "You are not allowed to perform Role Deletion."));
-    } else {
-      return res.status(result.code).send(result);
     }
+    if (!await roleService.roleExists(rolename)) {
+      const data = genErrorResponse(404, "Role does not exist", "Cant process your request")
+      return res.status(data.code).send(data)
+    }
+    const role = await roleService.deleteRole(rolename);
+    if (!role) {
+      let err = new Error("Error deleting role");
+      err.status = 500;
+      throw err;
+    }
+    const data = genSuccessResponse(200, "Role deleted successfully", role)
+    return res.status(data.code).send(data);
   } catch (err) {
-    return res.status(500).send(genErrorResponse(500, "Internal Server Error", err));
+    if (!err.status)
+      err.status = 500;
+    return res.status(err.status).send(genErrorResponse(err.status, err.message, err));
   }
 }
 
@@ -44,17 +65,30 @@ export async function updateRole(req, res) {
   try {
     const user = req.authData;
     const result = await permission(user.username, actions.createRole)
-    if (result === true) {
-      const {name, description, permissions} = req.body;
-      const data = await roleService.updateRole(name, permissions, description);
+
+    if (result === false) {
+      const data = genErrorResponse(403, "Forbidden", "You cannot update role")
       return res.status(data.code).send(data)
-    } else if (result === false) {
-      return res.status(403).send(genErrorResponse(403, "Forbidden", "You are not allowed to perform Role Creation."));
-    } else {
-      return res.status(result.code).send(result);
     }
+    const {rolename} = req.params;
+    if (!await roleService.roleExists(rolename)) {
+      const data = genErrorResponse(404, "Invalid Role", "Role does not exist")
+      return res.status(data.code).send(data)
+    }
+    const {permissions, description} = req.body;
+    const role = await roleService.updateRole(rolename, permissions, description)
+
+    if (!role) {
+      const data = genErrorResponse(500, "Internal server error", "Can't process your request")
+      return res.status(data.code).send(data)
+    }
+    const data = genSuccessResponse(201, "Role updated successfully", role)
+    return res.status(data.code).send(data);
+
   } catch (err) {
-    return res.status(500).send(genErrorResponse(500, "Internal Server Error", err));
+    if (!err.status)
+      err.status = 500;
+    return res.status(err.status).send(genErrorResponse(err.status, err.message, err));
   }
 }
 
@@ -62,22 +96,44 @@ export async function updateRole(req, res) {
 export async function getRole(req, res) {
   try {
     const user = req.authData;
-    const result = await permission(user.username, actions.seeRole)
-    if (result === true) {
-      const {name} = req.body;
-      const data = await roleService.getRole(name);
+    const result = await permission(user.username, actions.seeRole);
+    if (result === false) {
+      const data = genErrorResponse(403, "Forbidden", "You are not allowed to see Roles")
       return res.status(data.code).send(data)
-    } else if (result === false) {
-      return res.status(403).send(genErrorResponse(403, "Forbidden", "You are not allowed to perform Role Creation."));
-    } else {
-      return res.status(result.code).send(result);
     }
+
+    const {rolename} = req.params;
+    const role = await roleService.getRole(rolename);
+    if (!role) {
+      const data = genErrorResponse(404, "Role not found", "Role does not exists")
+      return res.status(data.code).send(data)
+    }
+    const data = genSuccessResponse(200, "Role Data", role)
+    return res.status(data.code).send(data)
   } catch (err) {
     return res.status(500).send(genErrorResponse(500, "Internal Server Error", err));
   }
 }
 
-export async function test(req, res) {
-  return res.status(200).send(genSuccessResponse(200, "This is Just a Test from Role controller", null))
-}
 
+export async function getRoles(req, res) {
+  try {
+    const user = req.authData;
+    const result = await permission(user.username, actions.seeRole);
+    if (result === false) {
+      const data = genErrorResponse(403, "Forbidden", "You are not allowed to see Roles")
+      return res.status(data.code).send(data)
+    }
+
+
+    const roles = await roleService.getRoles();
+    if (!roles) {
+      const data = genErrorResponse(404, "Role not found", "Role does not exists")
+      return res.status(data.code).send(data)
+    }
+    const data = genSuccessResponse(200, "Role Data", roles)
+    return res.status(data.code).send(data)
+  } catch (err) {
+    return res.status(500).send(genErrorResponse(500, "Internal Server Error", err));
+  }
+}

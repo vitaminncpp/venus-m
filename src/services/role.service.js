@@ -1,44 +1,73 @@
 import * as roleRepository from "../repository/role.repository.js";
 import {genErrorResponse, genSuccessResponse} from "../utils/message.utils.js";
 import {actions} from "../data/actions.data.js";
+import {findOne} from "../repository/role.repository.js";
+import {debugInfo} from "../utils/logger.utils.js";
+import {getDefaultRoles} from "../data/role.data.js";
 
 export async function getRole(name) {
   try {
     const data = await roleRepository.findOne(name);
     if (data) {
-      return genSuccessResponse(200, "Role Fetched successfully", {
+      return {
         name: data.name,
         permissions: data.permissions,
         description: data.description,
-      })
-    } else {
-      return genErrorResponse(404, `Role '${name}' not found`, "There is no such role defined");
-    }
+      }
+    } else return null
   } catch (err) {
-    return genErrorResponse(500, "Error Fetching Role Data", err)
+    throw err;
+  }
+}
+
+export async function getRoles() {
+  try {
+    const data = await roleRepository.findAll();
+    if (data) {
+      return data.map((e, i) => {
+        return {
+          index: i,
+          name: e.name,
+          permissions: e.permissions,
+          description: e.description,
+        }
+      })
+    } else return null;
+  } catch (err) {
+    throw err;
   }
 }
 
 
 export async function updateRole(name, permissions, description) {
   try {
-    try {
+    if (permissions) {
       for (let i = 0; i < permissions.length; i++) {
         if (!actions[permissions[i]]) {
-          return genErrorResponse(400, "Invalid Permission", `Invalid Permission: ${permissions[i]}`);
+          let err = new Error("Invalid permission");
+          err.status = 400;
+          throw err;
         }
       }
-    } catch (err) {
-      permissions = undefined;
     }
+
     const role = await roleRepository.updateRole(name, permissions, description);
-    return genSuccessResponse(201, "Role Updated successfully", {
+    if (!role) {
+      let err = new Error("Internal server error");
+      err.status = 500;
+      throw err;
+    }
+    return {
       name: role.name,
       permissions: role.permissions,
       description: role.description
-    })
+    }
   } catch (err) {
-    return genErrorResponse(500, "Error Updating Role", err)
+    if (!err.status) {
+      err.status = 500;
+    }
+    err.status = 500;
+    throw err;
   }
 }
 
@@ -47,30 +76,46 @@ export async function createRole(name, permissions, description) {
   try {
     for (let i = 0; i < permissions.length; i++) {
       if (!actions[permissions[i]]) {
-        return genErrorResponse(400, "Invalid Permission", `Invalid Permission: ${permissions[i]}`);
+        let err = new Error(`Permission ${permissions[i]} is not valid`);
+        err.status = 400;
+        throw err;
       }
     }
     const role = await roleRepository.saveRole(name, permissions, description);
-    return genSuccessResponse(201, "Role Created successfully", {
+    if (!role) {
+      let err = new Error(`Error creating role`);
+      err.status = 500;
+      throw err;
+    }
+    return {
       name: role.name,
       permissions: role.permissions,
       description: role.description
-    })
+    };
   } catch (err) {
-    return genErrorResponse(500, "Error creating Role", err)
+    throw err;
   }
 }
 
 export async function deleteRole(name) {
   try {
-    const result = await roleRepository.deleteRole(name);
-    return genSuccessResponse(200, "Role Deleted Successfully", result);
+    const role = await roleRepository.deleteRole(name);
+    if (!role) {
+      let err = new Error(`Error deleting role`);
+      err.status = 500;
+      throw err;
+    }
+    return {name: role.name, permissions: role.permissions, description: role.description};
   } catch (err) {
-    return genErrorResponse(500, "Error deleting Role", err)
+    throw err;
   }
 }
 
 
-export function getDefaultRoles() {
-  return ["user"];
+export async function roleExists(role) {
+  if (getDefaultRoles().includes(role)) {
+    return true;
+  }
+  const data = await findOne(role);
+  return !!data;
 }
