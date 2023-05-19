@@ -4,8 +4,6 @@ import * as roleService from "../services/role.service.js"
 import {genErrorResponse, genSuccessResponse} from "../utils/message.utils.js";
 import {permission} from "../services/permission.service.js";
 import {actions} from "../data/actions.data.js";
-import {test} from "../test/controller.test.js";
-import {debugInfo} from "../utils/logger.utils.js";
 
 
 dotenv.config()
