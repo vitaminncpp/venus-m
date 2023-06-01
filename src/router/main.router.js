@@ -5,8 +5,6 @@ import resourceRoutes from "./resource.router.js";
 import {statusCheck} from "../controllers/app.controller.js";
 import {test} from "../test/controller.test.js";
 import roleRoutes from "./role.router.js";
-import awsRoutes from "./aws.router.js";
-
 
 const router = Router()
 
@@ -16,6 +14,5 @@ router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/roles", roleRoutes);
 router.use("/resources", resourceRoutes);
-router.use("/aws", awsRoutes);
 
 export default router;
