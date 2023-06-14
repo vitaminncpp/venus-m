@@ -3,6 +3,7 @@ import * as authServices from "../services/auth.service.js"
 import * as userService from "../services/user.service.js"
 import {genErrorResponse, genSuccessResponse} from "../utils/message.utils.js";
 import {test} from "../test/controller.test.js";
+import {debugInfo} from "../utils/logger.utils.js";
 
 dotenv.config()
 
@@ -41,7 +42,7 @@ export async function refresh(req, res) {
     const data = await authServices.refresh(username)
     return res.status(data.code).send(data)
   } catch (err) {
-
+    // TODO refresh Error
   }
 }
 
